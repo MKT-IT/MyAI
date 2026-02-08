@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>記事 - My Blog</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', sans-serif;
+      background-color: #f8f9fa;
+      color: #1a1a2e;
+      line-height: 1.8;
+    }
+
+    header {
+      background-color: #1a1a2e;
+      color: white;
+      padding: 1.5rem 2rem;
+    }
+
+    header a {
+      color: white;
+      text-decoration: none;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    header a:hover {
+      opacity: 0.8;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    .back-link::before {
+      content: '← ';
+    }
+
+    main {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .article-container {
+      background: white;
+      border-radius: 8px;
+      padding: 2rem;
+      box-shadow: 0 2px 8px rgba(26, 26, 46, 0.08);
+    }
+
+    .article-content h1 {
+      font-size: 1.8rem;
+      color: #1a1a2e;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #1a1a2e;
+    }
+
+    .article-content h2 {
+      font-size: 1.4rem;
+      color: #1a1a2e;
+      margin: 2rem 0 1rem;
+      padding-left: 0.75rem;
+      border-left: 4px solid #1a1a2e;
+    }
+
+    .article-content h3 {
+      font-size: 1.2rem;
+      color: #2a2a3e;
+      margin: 1.5rem 0 0.75rem;
+    }
+
+    .article-content p {
+      margin: 1rem 0;
+      color: #3a3a4a;
+    }
+
+    .article-content ul,
+    .article-content ol {
+      margin: 1rem 0;
+      padding-left: 1.5rem;
+    }
+
+    .article-content li {
+      margin: 0.5rem 0;
+      color: #3a3a4a;
+    }
+
+    .article-content strong {
+      color: #1a1a2e;
+    }
+
+    .article-content blockquote {
+      margin: 1.5rem 0;
+      padding: 1rem 1.5rem;
+      background: #f0f0f5;
+      border-left: 4px solid #1a1a2e;
+      color: #4a4a5a;
+    }
+
+    .article-content code {
+      background: #f0f0f5;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+
+    .article-content pre {
+      background: #1a1a2e;
+      color: #e0e0e0;
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1.5rem 0;
+    }
+
+    .article-content pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+    }
+
+    .article-content table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+    }
+
+    .article-content th,
+    .article-content td {
+      border: 1px solid #d0d0d8;
+      padding: 0.75rem;
+      text-align: left;
+    }
+
+    .article-content th {
+      background: #1a1a2e;
+      color: white;
+    }
+
+    .article-content tr:nth-child(even) {
+      background: #f8f8fc;
+    }
+
+    .article-content hr {
+      border: none;
+      border-top: 1px solid #d0d0d8;
+      margin: 2rem 0;
+    }
+
+    .article-content a {
+      color: #2a4a8a;
+      text-decoration: underline;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      color: #6c6c80;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: #6c6c80;
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 600px) {
+      .article-container {
+        padding: 1.5rem 1rem;
+      }
+      .article-content h1 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="index.html" class="back-link">記事一覧に戻る</a>
+    <a href="index.html">My Blog</a>
+  </header>
+
+  <main>
+    <article class="article-container">
+      <div class="article-content" id="articleContent">
+        <p class="loading">記事を読み込み中...</p>
+      </div>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 My Blog. All rights reserved.</p>
+  </footer>
+
+  <script>
+    async function loadArticle() {
+      const params = new URLSearchParams(window.location.search);
+      const file = params.get('file');
+
+      if (!file) {
+        document.getElementById('articleContent').innerHTML =
+          '<p class="loading">記事が指定されていません</p>';
+        return;
+      }
+
+      try {
+        const response = await fetch(`article/${file}`);
+        if (!response.ok) throw new Error('記事が見つかりません');
+
+        const markdown = await response.text();
+        const html = marked.parse(markdown);
+
+        document.getElementById('articleContent').innerHTML = html;
+
+        const h1 = document.querySelector('.article-content h1');
+        if (h1) {
+          document.title = h1.textContent + ' - My Blog';
+        }
+      } catch (error) {
+        console.error('Failed to load article:', error);
+        document.getElementById('articleContent').innerHTML =
+          '<p class="loading">記事の読み込みに失敗しました</p>';
+      }
+    }
+
+    loadArticle();
+  </script>
+</body>
+</html>

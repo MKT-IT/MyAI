@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Blog</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', sans-serif;
+      background-color: #f8f9fa;
+      color: #1a1a2e;
+      line-height: 1.8;
+    }
+
+    header {
+      background-color: #1a1a2e;
+      color: white;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    header p {
+      margin-top: 0.5rem;
+      color: #a0a0b0;
+      font-size: 0.9rem;
+    }
+
+    main {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .article-list {
+      list-style: none;
+    }
+
+    .article-item {
+      background: white;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 8px rgba(26, 26, 46, 0.08);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .article-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(26, 26, 46, 0.12);
+    }
+
+    .article-item a {
+      display: block;
+      padding: 1.5rem;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .article-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #1a1a2e;
+      margin-bottom: 0.5rem;
+    }
+
+    .article-meta {
+      font-size: 0.85rem;
+      color: #6c6c80;
+    }
+
+    .article-summary {
+      margin-top: 0.75rem;
+      font-size: 0.95rem;
+      color: #4a4a5a;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: #6c6c80;
+      font-size: 0.85rem;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      color: #6c6c80;
+    }
+
+    @media (max-width: 600px) {
+      header h1 {
+        font-size: 1.5rem;
+      }
+      .article-item a {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>My Blog</h1>
+    <p>Tech & Life</p>
+  </header>
+
+  <main>
+    <ul class="article-list" id="articleList">
+      <li class="loading">記事を読み込み中...</li>
+    </ul>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 My Blog. All rights reserved.</p>
+  </footer>
+
+  <script>
+    async function loadArticles() {
+      try {
+        const response = await fetch('articles.json');
+        const articles = await response.json();
+
+        const listEl = document.getElementById('articleList');
+        listEl.innerHTML = '';
+
+        if (articles.length === 0) {
+          listEl.innerHTML = '<li class="loading">記事がありません</li>';
+          return;
+        }
+
+        articles.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        articles.forEach(article => {
+          const li = document.createElement('li');
+          li.className = 'article-item';
+          li.innerHTML = `
+            <a href="article.html?file=${encodeURIComponent(article.file)}">
+              <h2 class="article-title">${escapeHtml(article.title)}</h2>
+              <p class="article-meta">${article.date}</p>
+              <p class="article-summary">${escapeHtml(article.summary)}</p>
+            </a>
+          `;
+          listEl.appendChild(li);
+        });
+      } catch (error) {
+        console.error('Failed to load articles:', error);
+        document.getElementById('articleList').innerHTML =
+          '<li class="loading">記事の読み込みに失敗しました</li>';
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    loadArticles();
+  </script>
+</body>
+</html>
