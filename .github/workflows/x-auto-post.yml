@@ -1,0 +1,39 @@
+name: X Auto Post
+
+on:
+  schedule:
+    # 日本時間 朝9時 (UTC 0時)
+    - cron: '0 0 * * *'
+    # 日本時間 夕方18時 (UTC 9時)
+    - cron: '0 9 * * *'
+  # 手動実行も可能
+  workflow_dispatch:
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          cd x-auto-post
+          pip install -r requirements.txt
+
+      - name: Run auto post
+        env:
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          cd x-auto-post
+          python main.py --auto
